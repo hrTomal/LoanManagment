@@ -1,0 +1,282 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Saved Loan EMI";
+}
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<script src="https://code.angularjs.org/1.4.8/angular.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-select/0.19.8/select.min.js" integrity="sha512-IO99nu6TitXdydITTnjerPUo0HffdgLC9yIfv5gwglcsSR7nN008a7QDynI5Ih0mGLlnNnt8tGIuBCFRZaNjqw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-select/0.19.8/select.css" integrity="sha512-3MNyrZTIbIT7sGASBSy4HeOwFNhRephd5RfnYcyr7Nbs0CX3/KaNcpPivPOAkOfrKBLL2VtyNzXgphX1i71nEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.3/ui-bootstrap-tpls.js"></script>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+
+<div ng-app="SavedLoanEMIModule" ng-controller="SavedLoanEMIModuleController" ng-init="LoadAvailableData()">
+
+    @*Loader*@
+    <div class="text-center" ng-show="showLoader">
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+            </div>
+        </div>
+    </div>
+
+    <div class="row" ng-if="unApprovedLoans.length != 0">
+        <div>
+            <table class="table-bordered" style="width: 100%">
+                <tr>
+                    <th style="text-align: center">#SL</th>
+                    <th style="text-align: center">Id</th>
+                    <th style="text-align: center">Borrower</th>
+                    <th style="text-align: center">PartnerId</th>
+                    <th style="text-align: center">LoanAmount</th>
+                    <th style="text-align: center">InstallmentType</th>
+                    <th style="text-align: center">NoOfEMIs</th>
+                    <th style="text-align: center">LoanInterestRate</th>
+                    <th style="text-align: center">EMI Amount</th>
+                    <th style="text-align: center">LoanDisbursementDate</th>
+                    <th style="text-align: center">EMIRecoveryStartDate</th>
+                    <th style="text-align: center">Actions</th>
+                </tr>
+                <tr ng-repeat="loan in unApprovedLoans">
+                    <td style="text-align: center">{{$index + 1}}</td>
+                    <td style="text-align: center">{{loan.id}}</td>
+                    <td style="text-align: center">{{loan.borrowerName}} - {{loan.borrowerId}}</td>
+                    <td style="text-align: center">{{loan.partnerId}}</td>
+                    <td style="text-align: center">{{loan.loanAmount}}</td>
+                    <td style="text-align: center">{{loan.installmentType}}</td>
+                    <td style="text-align: center">{{loan.noOfEMIs}}</td>
+                    <td style="text-align: center">{{loan.interestRate}}</td>
+                    <td style="text-align: center">{{loan.principalWithInterestAmountEMI}}</td>
+                    <td style="text-align: center">{{loan.loanDisbursementDate}}</td>
+                    <td style="text-align: center">{{loan.emiRecoveryStartDate}}</td>
+                    <td>
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#detailsModal" ng-click="PopulateDetails(loan)">
+                            Details
+                        </button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center d-block">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Details</h5>
+                    <button type="button" class="close text-right d-block" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="margin: 10px">
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Borrower Id</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.borrowerId}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Borrower</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.borrowerName}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Partner Id</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.partnerId}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Product Id</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.productId}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Loan Amount</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.loanAmount}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Tenure</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.tenure}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Installment Type</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.installmentType}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">No Of EMIs</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.noOfEMIs}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Loan Processing Fees</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.loanProcessingFees}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Pass Book Charges</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.passBookCharges}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Other Charges</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.otherCharges}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Vat On Loan Processing Fees</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.vatOnLoanProcessingFees}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Interest Rate</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.interestRate}}" disabled />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Principal Amount EMI</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.principalAmountEMI}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Principal With Interest Amount EMI</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.principalWithInterestAmountEMI}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Savings Deposit Amount</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.savingsDepositAmount}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Savings Installment Type</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.savingsInstallmentType}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Type Of Savings</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.typeOfSavings}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Savings Interest Rate</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.savingsInterestRate}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Loan Disbursement Date</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.loanDisbursementDate}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">EMI Recovery Start Date</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.emiRecoveryStartDate}}" disabled />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-4 col-form-label">Created By</label>
+                                <input class="col-sm-8" value="{{popUpLoanValue.createdBy}}" disabled />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#RejectAlertsModal">Reject</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ApproveAlertsModal">Approve</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Alert Modal -->
+    <div class="modal" id="RejectAlertsModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Loan Rejection</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Reject The Loan for : {{popUpLoanValue.borrowerName}}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" ng-click="RejectLoan()">Confirm</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approve Alert Modal -->
+    <div class="modal" id="ApproveAlertsModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Loan Approval</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Approve The Loan for : {{popUpLoanValue.borrowerName}}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info" ng-click="ApproveLoan()">Confirm</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    var app = angular.module('SavedLoanEMIModule', ['ui.bootstrap']);
+    app.controller('SavedLoanEMIModuleController', function ($scope, $http) {
+
+        $scope.unApprovedLoans;   
+        $scope.popUpLoanValue;
+        $scope.showLoader = false;
+
+        $scope.LoadAvailableData = () => {
+            $scope.showLoader = true;
+            let url = "/api/GetUnApprovedLoans/";
+            $http.get(url, { headers: { 'Content-Type': 'application/json' } })
+                .then(function (response) {
+                    $scope.showLoader = false;
+                    $scope.unApprovedLoans = response.data.model;
+                    console.log($scope.unApprovedLoans);
+                })
+        }
+
+        $scope.PopulateDetails = (loan) => {
+            $scope.popUpLoanValue = loan;
+        }
+
+        $scope.formatDate = (date) => {
+            return date.toLocaleDateString();
+        }
+
+        $scope.ApproveLoan = () => {
+            $http.post('/api/ApproveLoan', $scope.popUpLoanValue, { headers: { 'Content-Type': 'application/json' } })
+                .then(function (response) {
+                    console.log(response);
+                    if (response.data.model.Message == "Approved") {
+                        alert('Approved!');
+                        window.location.reload();
+                    }
+                    else {
+                        alert('Something went wrong...')
+                    }
+                }, function error(response) {
+                    alert("internal server error");
+                });
+        }
+        $scope.RejectLoan = () => {
+            $http.post('/api/RejectLoan', $scope.popUpLoanValue, { headers: { 'Content-Type': 'application/json' } })
+                .then(function (response) {
+                    console.log(response);
+                }, function error(response) {
+                    alert("internal server error");
+                });
+        }
+    
+    });
+
+</script>

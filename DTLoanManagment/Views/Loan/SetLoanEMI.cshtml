@@ -1,0 +1,298 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Set Loan EMI";
+}
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<script src="https://code.angularjs.org/1.4.8/angular.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-select/0.19.8/select.min.js" integrity="sha512-IO99nu6TitXdydITTnjerPUo0HffdgLC9yIfv5gwglcsSR7nN008a7QDynI5Ih0mGLlnNnt8tGIuBCFRZaNjqw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-select/0.19.8/select.css" integrity="sha512-3MNyrZTIbIT7sGASBSy4HeOwFNhRephd5RfnYcyr7Nbs0CX3/KaNcpPivPOAkOfrKBLL2VtyNzXgphX1i71nEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular-sanitize.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/3.4.5/select2.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.8.5/css/selectize.default.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.3/ui-bootstrap-tpls.js"></script>
+@*
+<script src="../Scripts/baseurl.js"></script>
+*@
+
+
+
+<div ng-app="SetLoanEMIModule" ng-controller="SetLoanEMIModuleController">
+    @*Loader*@
+    <div class="text-center" ng-show="showLoader">
+       
+        @*<div class="spinner-grow text-success" role="status">
+        </div>
+        <div class="spinner-grow text-danger" role="status">
+        </div>
+        <div class="spinner-grow text-warning" role="status">
+            <span class="sr-only">...Loading...</span>
+        </div>*@
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                @*<span class="sr-only">Loading...</span>*@
+            </div>
+        </div>
+        
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <label class="form-group-lg">Borrower Name: </label>
+            <ui-select ng-model="merchant" class="form-control" theme="select2" style="width:250px;" on-select="onSelectGetData($item, $model)">
+            <ui-select-match>
+                <span ng-bind="$select.selected.companyName"></span>
+            </ui-select-match>
+            <ui-select-choices repeat="item in (allMerchantInfo | filter: $select.search)" refresh="loadMerchantData($select.search)" refresh-delay="100" minimum-input-length="1">
+                <span ng-bind="item.companyName +' - '+item.mobile"></span>
+            </ui-select-choices>
+        </ui-select>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-4">
+            <label class="form-group-lg">Partner Name: </label>
+            @*<input class="form-control" id="partnerName" ng-model="partnerName" ng-change="">*@
+            <select class="form-select" aria-label="Default select example" id="partnerName" ng-model="partnerName" ng-change="">
+                <option value="1">Sojon</option>
+            </select>
+        </div>
+        <div class="col-lg-4">
+            <label class="form-group-lg">Product Type: </label>
+            <input class="form-control" id="productType" ng-model="productType" ng-change="">
+        </div>
+    </div>
+    <div class="row">
+        <div class ="col-lg-4">
+            <label class="form-group-lg">Loan Amount: </label>
+            <input class="form-control" id="loanAmount" ng-model="loanAmount" ng-change="CalculateNoOfEmis()">
+        </div>
+        <div class ="col-lg-4">
+            <label class="form-group-lg">Loan Tenure (months): </label>
+            <select class="form-select" aria-label="Default select example" id="loanTenureInMonths" ng-model="loanTenureInMonths" ng-change="CalculateNoOfEmis()">
+                <option value="-1">--Select--</option>
+                <option value="3">3</option>
+                <option value="6">6</option>
+                <option value="9">9</option>
+                <option value="12">12</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class ="col-lg-4">
+            <label class="form-group-lg">Installment Type: </label>
+            <select class="form-select" aria-label="Default select example" id="installmentType" ng-model="installmentType" ng-change="CalculateNoOfEmis()">
+                <option value="1" selected>Monthly</option>
+                <option value="2">Weekly</option>
+            </select>
+        </div>
+
+        <div class ="col-lg-4">
+            <label class="form-group-lg">No of EMI's: </label>
+            <input class="form-control" id="noOfEmi" ng-model="noOfEmi" ng-change="">
+        </div>
+    </div>
+    <div class="row">
+        <div class ="col-lg-4">
+            <label class="form-group-lg">Loan Processing Fees: </label>
+            <input class="form-control" id="loanProcessingFees" ng-model="loanProcessingFees" ng-change="">
+        </div>
+        <div class ="col-lg-4">
+            <label class="form-group-lg">Pass Book Charge's: </label>
+            <input class="form-control" id="passBookCharges" ng-model="passBookCharges" ng-change="">
+        </div>
+        
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <label class="form-group-lg"> Other Charge's: </label>
+            <input class="form-control" id="otherCharges" ng-model="otherCharges" ng-change="">
+        </div>
+        <div class="col-lg-4">
+            <label class="form-group-lg">VAT on Loan Processing Fees :</label>
+            <input class="form-control" id="vatOnLoanProcessingFees" ng-model="vatOnLoanProcessingFees" ng-change="">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <label class="form-group-lg">Interest rate (%) : </label>
+            <input type="number" class="form-control" id="interestRate" ng-model="interestRate" ng-change="CalculateEMIAmount()">
+        </div>
+        @*<div class="col-lg-4">
+            <label class="form-group-lg">VAT on Loan Processing Fees :</label>
+            <input class="form-control" id="vatOnLoanProcessingFees" ng-model="vatOnLoanProcessingFees" ng-change="">
+        </div>*@
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <label class="form-group-lg">Monthly/ Weekly EMI (Principal): </label>
+            <input class="form-control" id="principalEMI" ng-model="principalEMI" ng-change="">
+        </div>
+        <div class="col-lg-4">
+            <label class="form-group-lg">Monthly EMI (with interest) :</label>
+            <input class="form-control" id="withInterestEMI" ng-model="withInterestEMI" ng-change="">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <label class="form-group-lg">Savings Deposit Value: </label>
+            <input class="form-control" id="savingsDepositValue" ng-model="savingsDepositValue" ng-change="">
+        </div>
+        <div class="col-lg-4">
+            <label class="form-group-lg">Savings Installment Type:</label>            
+            <select class="form-select" aria-label="Default select example" id="savingsInstallmentType" ng-model="savingsInstallmentType" ng-change="">
+                <option value="1" selected>Monthly</option>
+                <option value="2">Weekly</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <label class="form-group-lg">Type of savings: </label>            
+            <select class="form-select" aria-label="Default select example" id="typeOfSavings" ng-model="typeOfSavings" ng-change="">
+                <option value="1" selected>Monthly Diposit Plus</option>
+                <option value="2">Quarterly Deposit Plus</option>
+            </select>
+        </div>
+        <div class="col-lg-4">
+            <label class="form-group-lg">Savings Interest Rate (%):</label>
+            <input type="number" class="form-control" id="savingsInterestRate" ng-model="savingsInterestRate" ng-change="">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <label class="form-group-lg">Loan Disbursement Date: </label>
+            <input type="date" class="form-control" id="loanDisbursementDate" ng-model="loanDisbursementDate" ng-change="">
+        </div>
+        <div class="col-lg-4">
+            <label class="form-group-lg">EMI Recovery Start Date:</label>
+            <input type="date" class="form-control" id="emiRecoveryStartDate" ng-model="emiRecoveryStartDate" ng-change="">
+        </div>
+    </div>
+    <div>
+        <button type="button" class="btn btn-primary btn-lg" ng-click="SaveLoanEMI()">Set EMI</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var app = angular.module('SetLoanEMIModule', ['ui.select', 'ngSanitize', 'ui.bootstrap']);
+    app.controller('SetLoanEMIModuleController', function ($scope, $http) { 
+        
+        $scope.showLoader = false;
+        $scope.installmentType = "1";
+        $scope.loanTenureInMonths = "-1";
+        $scope.TotalWeeks = 46;
+        $scope.partnerName = '1';
+        $scope.savingsInstallmentType = '1';
+        $scope.typeOfSavings = '1';
+        $scope.loanSurveyId = 0;
+
+        $scope.loadMerchantData = (merchantSearch) => {
+            if (merchantSearch.length > 1) {
+                let url = "http://localhost:58676/api/" + "Fetch/GetAllCourierUsersList/" + merchantSearch;
+                $http.get(url, { headers: { 'Content-Type': 'application/json' } })
+                    .then(function (response) {
+                        $scope.allMerchantInfo = response.data.model;                        
+                    })
+            }
+
+        }
+
+        $scope.onSelectGetData = function (item, model) {
+            let courierUserId = item["courierUserId"];
+            $scope.merchantUserId = courierUserId;
+            $scope.merchantMobileNumber = item["mobile"];
+            $scope.selectedCompanyName = item["companyName"];
+
+            $scope.GetLoanAmountOnBorrowerSelect();
+        }
+
+        $scope.GetLoanAmountOnBorrowerSelect = () => {
+            $scope.showLoader = true;
+                $http.get('https://localhost:7293/api/FetchLoanData/GetAppliedLoanAmountByMerchants/' + $scope.merchantUserId,).then(function (response) {
+                // success callback
+                $scope.showLoader = false;
+                if (response.data.interestedAmount == 0 && response.data.loanSurveyId == 0){
+                    alert('No Application Found for this borrower.');
+                    window.location.reload();
+                }
+                else{
+                    $scope.loanAmount = response.data.interestedAmount;
+                    $scope.loanSurveyId = response.data.loanSurveyId;
+                }
+                
+            }, function (response) {
+                // error callback
+                console.log(response);
+            });
+        }
+
+        $scope.CalculateNoOfEmis = () => {
+            
+            let tenureInMonths = parseInt($scope.loanTenureInMonths);
+             
+            if (tenureInMonths == "-1"){}
+            else if ($scope.installmentType == "2") {                
+                let emis = Math.floor(($scope.TotalWeeks * tenureInMonths) / 12);
+                $scope.noOfEmi = emis;
+                $scope.CalculateEMIAmount();
+            }
+            else{
+                $scope.noOfEmi = tenureInMonths;
+                $scope.CalculateEMIAmount();
+            }
+        }
+
+        $scope.CalculateEMIAmount = () =>{
+            let noOfEmi = $scope.noOfEmi;
+            if ($scope.loanAmount == undefined || $scope.loanAmount == null || $scope.loanAmount == '') { }
+            else{
+                let floatLoanAmount = parseFloat($scope.loanAmount);
+                $scope.principalEMI = parseFloat(floatLoanAmount / noOfEmi).toFixed(2);
+                if ($scope.interestRate == undefined || $scope.interestRate == null || $scope.interestRate == '') { }
+                else{
+                    let withInterestTotal = floatLoanAmount + ((floatLoanAmount * $scope.interestRate) / 100 );
+                    $scope.withInterestEMI = parseFloat(withInterestTotal / noOfEmi).toFixed(2);
+                }
+            }
+        }
+        
+        $scope.SaveLoanEMI = () => {
+
+            var reqObj = {
+                'BorrowerId': $scope.merchantUserId,
+                'BorrowerName': $scope.selectedCompanyName,
+                'PartnerId':1,
+                'ProductId':1,
+                'LoanAmount': $scope.loanAmount,
+                'Tenure': $scope.loanTenureInMonths,
+                'InstallmentType': $scope.installmentType,
+                'NoOfEMIs': $scope.noOfEmi,
+                'LoanProcessingFees': $scope.loanProcessingFees,
+                'PassBookCharges': $scope.passBookCharges,
+                'OtherCharges': $scope.otherCharges,
+                'VatOnLoanProcessingFees': $scope.vatOnLoanProcessingFees,
+                'InterestRate': $scope.interestRate,
+                'PrincipalAmountEMI': $scope.principalEMI,
+                'PrincipalWithInterestAmountEMI': $scope.withInterestEMI,
+                'SavingsDepositAmount': $scope.savingsDepositValue,
+                'SavingsInstallmentType': $scope.savingsInstallmentType,
+                'TypeOfSavings': $scope.typeOfSavings,
+                'SavingsInterestRate': $scope.savingsInterestRate,
+                'LoanDisbursementDate': $scope.loanDisbursementDate,
+                'EmiRecoveryStartDate': $scope.emiRecoveryStartDate,
+                'LoanSurveyId': $scope.loanSurveyId
+            }
+            $http.post('/api/SaveLoanEmi', reqObj, { headers: { 'Content-Type': 'application/json' } })
+                .then(function (response) {   
+                    alert(response.data.model.message);
+                    window.location.reload();
+                }, function error(response) {
+                    alert("internal server error");
+                });
+        }      
+
+    });
+</script>

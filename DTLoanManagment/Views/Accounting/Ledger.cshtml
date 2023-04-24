@@ -1,0 +1,197 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Add Or Update Ledger";
+}
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<script src="https://code.angularjs.org/1.4.8/angular.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-select/0.19.8/select.min.js" integrity="sha512-IO99nu6TitXdydITTnjerPUo0HffdgLC9yIfv5gwglcsSR7nN008a7QDynI5Ih0mGLlnNnt8tGIuBCFRZaNjqw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-select/0.19.8/select.css" integrity="sha512-3MNyrZTIbIT7sGASBSy4HeOwFNhRephd5RfnYcyr7Nbs0CX3/KaNcpPivPOAkOfrKBLL2VtyNzXgphX1i71nEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular-sanitize.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/3.4.5/select2.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.8.5/css/selectize.default.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.3/ui-bootstrap-tpls.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+<div ng-app="LedgerModule" ng-controller="LedgerModuleCtrl" ng-init="LoadLedger()">
+    @*Loader*@
+    <div class="text-center" ng-show="showLoader">
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                @*<span class="sr-only">Loading...</span>*@
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="input-group col-md-6 mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">Ledger Name</span>
+          </div>
+            <input type="text" class="form-control" placeholder="Ledger Name" aria-label="LedgerName" aria-describedby="basic-addon1">
+        </div>
+        <div class="col-md-2"></div>
+        <div class="form-check col-md-4 ml-3">
+            <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
+            <label class="form-check-label" for="flexCheckChecked">
+               Is Ledger Account
+            </label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div>
+                <label>Select a Group/Ledger from the list</label>
+                <div class="list-group" ng-model="listtest">
+                    <a href="#" ng-repeat="item in mainLedgers" ng-click="setLedgerActive(item)" ng-class="{ 'list-group-item': true, 'list-group-item-action': true, 'active': item.isActive }">{{ item.label }}</a>
+                </div>
+            </div>            
+            <div ng-show="subGroupItems.length > 0">
+                <h4>Group <span class="label label-default">Sub Group</span></h4>
+                <div class="list-group">
+                    <a href="#" ng-repeat="item in subGroupItems" ng-click="setSubGroupActive(item)" ng-class="{ 'list-group-item': true, 'list-group-item-action': true, 'active': item.isActive }">{{ item.label }}</a>
+                </div>
+            </div>            
+        </div>
+        
+        <div class="col-md-4 mb-3" ng-show="subSubGroupItems.length > 0">
+            <h4>Group <span class="label label-default">Sub-Sub Group</span></h4>
+            <div class="list-group overflow-auto" style="max-height: 350px;">
+                <a href="#" ng-repeat="item in subSubGroupItems" ng-click="setSubSubGroupActive(item)" ng-class="{ 'list-group-item': true, 'list-group-item-action': true, 'active': item.isActive }">{{ item.label }}</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3" ng-show="ledgerItems.length > 0">
+            <h4>Ledger <span class="label label-default">Ledger</span></h4>
+            <div class="list-group overflow-auto" style="max-height: 350px;">
+                <a href="#" ng-repeat="item in ledgerItems" ng-model="test" ng-click="setledgerGroupActive(item)" ng-class="{ 'list-group-item': true, 'list-group-item-action': true, 'active': item.isActive }">{{ item.label }}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center mt-4">
+        <button type="button" class="btn btn-success m-2" ng-click="CreateOrUpdate()">Save</button>
+        <button type="button" class="btn btn-danger m-2">Cancel</button>
+    </div>
+</div>
+
+    <script>
+        var app = angular.module('LedgerModule', []);
+
+        app.controller('LedgerModuleCtrl', function ($scope, $http) {
+
+            $scope.mainGroup = "";
+            $scope.subGroup = "";
+            $scope.subSubGroup = "";
+
+            $scope.showLoader = false;
+            $scope.mainLedgers = [];
+            $scope.subGroupItems = [];
+            $scope.subSubGroupItems = [];
+            $scope.ledgerItems = [];
+
+            $scope.ledgerUnder = [];
+            $scope.ledgerUnderId = "";
+
+            $scope.LoadLedger = () => {
+                $scope.showLoader = true;
+                let url = "/api/GetMainLedgers/";
+                $http.get(url, { headers: { 'Content-Type': 'application/json' } })
+                    .then(function (response) {
+                        $scope.showLoader = false;
+                        console.log(response.data.model);
+                        $scope.mainLedgers = response.data.model.map(function (item) {
+                            return Object.assign({}, { label: item.sbName, ledgerId: item.ledgerId });
+                        });
+
+                    })
+            }
+
+            $scope.LoadSubGroupItems = (mainLedgerId, level) => {
+                $scope.showLoader = true;               
+                
+                let url = "/api/GetSubGroupLedgers/" + mainLedgerId + "/" + level;
+                $http.get(url, { headers: { 'Content-Type': 'application/json' } })
+                    .then(function (response) {
+                        $scope.showLoader = false;
+
+                        if (level == 1) {
+                            $scope.subGroupItems = response.data.model.map(function (item) {
+                                return Object.assign({}, { label: item.sbName, ledgerId: item.ledgerId });
+                            });
+                        }
+                        else if (level == 2) {                            
+                            $scope.subSubGroupItems = response.data.model.map(function (item) {
+                                return Object.assign({}, { label: item.sbName, ledgerId: item.ledgerId });
+                            });
+                        }
+                        else if (level == 3) {                            
+                            $scope.ledgerItems = response.data.model.map(function (item) {
+                                return Object.assign({}, { label: item.sbName, ledgerId: item.ledgerId });
+                            });
+                        }
+                    })
+            }
+
+            $scope.setLedgerActive = function (item) {                
+
+                $scope.subGroupItems = [];
+                $scope.subSubGroupItems = []; 
+                $scope.ledgerItems = [];
+                $scope.mainGroup = item.ledgerId;
+
+                $scope.LoadSubGroupItems(item.ledgerId, 1);
+                $scope.mainLedgers.forEach(function (item) {
+                    item.isActive = false;
+                });
+                item.isActive = true;
+            };
+
+            $scope.setSubGroupActive = function (item) {
+                $scope.subSubGroupItems = [];
+                $scope.ledgerItems = [];
+                $scope.LoadSubGroupItems(item.ledgerId, 2);
+                $scope.subGroup = item.ledgerId;
+                $scope.ledgerUnder.push(item.label);
+
+                $scope.subGroupItems.forEach(function (item) {
+                    item.isActive = false;
+                });
+                item.isActive = true;
+            };
+
+            $scope.setSubSubGroupActive = function (item) {
+                $scope.ledgerItems = [];
+                $scope.subSubGroup = item.ledgerId;
+                $scope.LoadSubGroupItems(item.ledgerId, 3);
+                $scope.subSubGroupItems.forEach(function (item) {
+                    item.isActive = false;
+                });
+                item.isActive = true;
+            };
+            //$scope.setledgerGroupActive = function (item) {
+            //    $scope.ledgerItems.forEach(function (item) {
+            //        item.isActive = false;
+            //    });
+            //    item.isActive = true;
+            //};
+
+            $scope.CreateOrUpdate = () => {
+                if($scope.mainGroup == ""){
+                    alert("Please Select Main group first");
+                }
+                else if ($scope.mainGroup != "" && $scope.subGroup == "" && $scope.subSubGroup == "") {
+                    console.log($scope.mainGroup, 'under Main group')
+                }
+                else if ($scope.mainGroup != "" && $scope.subGroup != "" && $scope.subSubGroup == "") {
+                    console.log($scope.mainGroup + ',' + $scope.subGroup, 'under sub group')
+                }
+                else if ($scope.mainGroup != "" && $scope.subGroup != "" && $scope.subSubGroup != "") {
+                    console.log($scope.mainGroup + ',' + $scope.subGroup + ',' + $scope.subSubGroup, 'under ledger group')
+                }
+            }
+        });
+    </script>
